@@ -174,5 +174,3 @@ def delete_sub():
 if __name__ == '__main__':
     insert_default_users()  #  THIS AUTO ADDS USERS
     app.run(host='0.0.0.0', port=5000, debug=True)
-
-

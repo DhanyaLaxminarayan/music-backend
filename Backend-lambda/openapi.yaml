@@ -1,0 +1,639 @@
+openapi: 3.0.3
+info:
+  title: Music Subscription Backend API
+  description: |
+    Complete API specification for the Music Subscription Backend.
+    
+    ## Authentication
+    Currently, no authentication headers are required. Future versions will implement JWT tokens.
+    
+    ## Response Format
+    All responses return JSON with the specified schema.
+    
+    ## CORS Headers
+    All responses include:
+    - Access-Control-Allow-Origin: *
+    - Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS
+    - Access-Control-Allow-Headers: Content-Type, Authorization
+    
+    ## Error Handling
+    All errors follow a consistent format with a success flag and error message.
+  version: 1.0.0
+servers:
+  - url: https://{api-id}.execute-api.us-east-1.amazonaws.com/{stage}
+    variables:
+      api-id:
+        description: API Gateway ID
+        default: abc123def
+      stage:
+        description: API stage (dev, prod, etc.)
+        default: dev
+
+paths:
+  /login:
+    post:
+      summary: Authenticate user
+      description: Authenticate user and return basic user information.
+      operationId: loginUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              default:
+                value:
+                  email: user@example.com
+                  password: password123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Login successful
+                  user:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: user@example.com
+                      user_name:
+                        type: string
+                        example: john_doe
+        '400':
+          description: Missing required parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Email and password are required
+        '401':
+          description: Authentication failed - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: email or password is invalid
+
+  /register:
+    post:
+      summary: Create new user account
+      description: Create a new user account.
+      operationId: registerUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              default:
+                value:
+                  email: newuser@example.com
+                  user_name: john_doe
+                  password: password123
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Registration successful
+                  user:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: newuser@example.com
+                      user_name:
+                        type: string
+                        example: john_doe
+        '400':
+          description: Bad request - missing fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Email, username, and password are required
+        '409':
+          description: Conflict - email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: The email already exists
+
+  /music:
+    get:
+      summary: Search for songs
+      description: Search for songs by title, artist, album, or year. All provided parameters are combined with AND logic.
+      operationId: searchMusic
+      tags:
+        - Music Search
+      parameters:
+        - name: title
+          in: query
+          description: Search songs by title (case-insensitive, partial match)
+          required: false
+          schema:
+            type: string
+          example: love
+        - name: artist
+          in: query
+          description: Search songs by artist name
+          required: false
+          schema:
+            type: string
+          example: taylor
+        - name: album
+          in: query
+          description: Search songs by album name
+          required: false
+          schema:
+            type: string
+          example: fearless
+        - name: year
+          in: query
+          description: Filter by release year
+          required: false
+          schema:
+            type: integer
+          example: 2024
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 2
+                  songs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Song'
+                  message:
+                    type: string
+                    description: Only present when no results found
+                    example: No result is retrieved. Please query again
+              examples:
+                withResults:
+                  value:
+                    success: true
+                    count: 2
+                    songs:
+                      - song_id: song123
+                        title: Love Story
+                        artist: Taylor Swift
+                        album: Fearless
+                        year: 2008
+                        image_url: https://s3.amazonaws.com/bucket/image1.jpg
+                      - song_id: song456
+                        title: Love Me Like You Do
+                        artist: Ellie Goulding
+                        album: Delirium
+                        year: 2015
+                        image_url: https://s3.amazonaws.com/bucket/image2.jpg
+                noResults:
+                  value:
+                    success: true
+                    count: 0
+                    songs: []
+                    message: No result is retrieved. Please query again
+        '400':
+          description: Missing query parameters - at least one required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: At least one query parameter (title, artist, album, or year) is required
+
+  /subscriptions:
+    get:
+      summary: Get user subscriptions
+      description: Get all songs subscribed by a user. Returns complete song information for frontend display.
+      operationId: getUserSubscriptions
+      tags:
+        - Subscriptions
+      parameters:
+        - name: email
+          in: query
+          description: User email address
+          required: true
+          schema:
+            type: string
+          example: user@example.com
+      responses:
+        '200':
+          description: User subscriptions with complete song information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionListResponse'
+              example:
+                success: true
+                count: 1
+                subscriptions:
+                  - song_id: Taylor Swift#Fearless#2008#Love Story
+                    title: Love Story
+                    artist: Taylor Swift
+                    album: Fearless
+                    year: 2008
+                    image_url: https://s3.amazonaws.com/bucket/image1.jpg
+                    subscribed_at: '2026-05-01T14:09:05.761Z'
+        '400':
+          description: Missing email parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Email parameter is required
+
+    post:
+      summary: Subscribe to a song
+      description: Subscribe to a song.
+      operationId: addSubscription
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionRequest'
+            examples:
+              default:
+                value:
+                  email: user@example.com
+                  song_id: song123
+      responses:
+        '201':
+          description: Subscription added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Subscription added successfully
+        '400':
+          description: Bad request - missing fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Email and song_id are required
+        '404':
+          description: Song not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Song not found
+        '409':
+          description: Conflict - already subscribed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: This song is already subscribed
+
+    delete:
+      summary: Unsubscribe from a song
+      description: Unsubscribe from a song.
+      operationId: removeSubscription
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionRequest'
+            examples:
+              default:
+                value:
+                  email: user@example.com
+                  song_id: song123
+      responses:
+        '200':
+          description: Subscription removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                success: true
+                message: Subscription removed successfully
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Email and song_id are required
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Subscription not found
+
+components:
+  schemas:
+    User:
+      type: object
+      description: User account information
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address (unique)
+        user_name:
+          type: string
+          description: Display name
+        password:
+          type: string
+          description: User password (plaintext in v1, will be hashed in v2)
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp (ISO 8601)
+      required:
+        - email
+        - user_name
+        - password
+      example:
+        email: user@example.com
+        user_name: john_doe
+        password: password123
+        created_at: '2024-01-15T10:30:00.000Z'
+
+    Song:
+      type: object
+      description: Music song information
+      properties:
+        song_id:
+          type: string
+          description: Unique song identifier
+        title:
+          type: string
+          description: Song title
+        artist:
+          type: string
+          description: Artist name
+        album:
+          type: string
+          description: Album name
+        year:
+          type: integer
+          description: Release year
+        image_url:
+          type: string
+          format: uri
+          description: S3 URL to artist/album image
+      required:
+        - song_id
+        - title
+        - artist
+        - album
+        - year
+        - image_url
+      example:
+        song_id: song123
+        title: Love Story
+        artist: Taylor Swift
+        album: Fearless
+        year: 2008
+        image_url: https://s3.amazonaws.com/bucket/image.jpg
+
+    Subscription:
+      type: object
+      description: User music subscription with full song details
+      properties:
+        song_id:
+          type: string
+          description: Unique song identifier
+        title:
+          type: string
+          description: Song title
+        artist:
+          type: string
+          description: Artist name
+        album:
+          type: string
+          description: Album name
+        year:
+          type: integer
+          description: Release year
+        image_url:
+          type: string
+          format: uri
+          description: S3 URL to artist/album image
+        subscribed_at:
+          type: string
+          format: date-time
+          description: Subscription creation timestamp
+      required:
+        - song_id
+        - title
+        - artist
+        - album
+        - year
+        - image_url
+        - subscribed_at
+      example:
+        song_id: Taylor Swift#Fearless#2008#Love Story
+        title: Love Story
+        artist: Taylor Swift
+        album: Fearless
+        year: 2008
+        image_url: https://s3.amazonaws.com/bucket/image1.jpg
+        subscribed_at: '2026-05-01T14:09:05.761Z'
+
+    LoginRequest:
+      type: object
+      description: User login credentials
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+        password:
+          type: string
+          description: User password
+      required:
+        - email
+        - password
+      example:
+        email: user@example.com
+        password: password123
+
+    RegisterRequest:
+      type: object
+      description: New user registration information
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address (must be unique)
+        user_name:
+          type: string
+          description: Display name
+        password:
+          type: string
+          description: User password
+      required:
+        - email
+        - user_name
+        - password
+      example:
+        email: newuser@example.com
+        user_name: john_doe
+        password: password123
+
+    SubscriptionRequest:
+      type: object
+      description: Subscription request (add or remove)
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+        song_id:
+          type: string
+          description: Song ID
+      required:
+        - email
+        - song_id
+      example:
+        email: user@example.com
+        song_id: song123
+
+    MessageResponse:
+      type: object
+      description: Simple success message response
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          description: Operation description or result message
+      required:
+        - success
+        - message
+
+    MusicQueryResponse:
+      type: object
+      description: Music search results response
+      properties:
+        success:
+          type: boolean
+          example: true
+        count:
+          type: integer
+          description: Number of songs returned
+        songs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Song'
+        message:
+          type: string
+          description: Optional message when no results found
+      required:
+        - success
+        - count
+        - songs
+
+    SubscriptionListResponse:
+      type: object
+      description: User subscriptions list response with full song information
+      properties:
+        success:
+          type: boolean
+          example: true
+        count:
+          type: integer
+          description: Number of subscriptions
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+      required:
+        - success
+        - count
+        - subscriptions
+
+    ErrorResponse:
+      type: object
+      description: Error response
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Error description
+      required:
+        - success
+        - message
+      example:
+        success: false
+        message: Error description here
+
+tags:
+  - name: Authentication
+    description: User login and registration
+  - name: Music Search
+    description: Search and discover music
+  - name: Subscriptions
+    description: Manage user music subscriptions

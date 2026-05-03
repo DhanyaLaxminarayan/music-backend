@@ -1,0 +1,31 @@
+{
+  "name": "music-subscription-backend",
+  "version": "1.0.0",
+  "description": "AWS Lambda backend for Music Subscription Web App",
+  "main": "src/handler.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test src/**/*.test.js",
+    "local": "node src/local.js",
+    "create:infra": "node scripts/create-infrastructure.js",
+    "upload:images": "node scripts/upload-images-to-s3.js",
+    "seed:music": "node scripts/seed-music-data.js",
+    "seed:login": "node scripts/seed-login-data.js",
+    "seed": "npm run seed:music",
+    "upload-images": "npm run upload:images",
+    "package:function": "powershell -NoProfile -Command \"Compress-Archive -Path src,node_modules,package.json -DestinationPath function.zip -Force\"",
+    "predeploy": "npm run package:function",
+    "deploy": "aws lambda update-function-code --function-name music-subscription-api --zip-file fileb://function.zip"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.500.0",
+    "@aws-sdk/client-s3": "^3.500.0",
+    "@aws-sdk/lib-dynamodb": "^3.500.0"
+  },
+  "devDependencies": {
+    "aws-sdk-client-mock": "^3.0.0"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}

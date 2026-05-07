@@ -1,0 +1,1 @@
+Place the official 2026a2_songs.json file in this folder before running setup_data.py.

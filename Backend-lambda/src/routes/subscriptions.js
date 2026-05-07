@@ -7,6 +7,30 @@ import { successResponse, errorResponse } from '../utils/response.js';
 
 const subscriptionsTable = process.env.SUBSCRIPTIONS_TABLE || 'subscriptions';
 
+function getSongIdentifier(body) {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  if (body.song_id) {
+    return body.song_id;
+  }
+
+  if (body.title_year) {
+    return body.title_year;
+  }
+
+  if (body.title && body.year) {
+    return `${body.title}#${body.year}`;
+  }
+
+  return null;
+}
+
+function getImageUrl(song) {
+  return song?.image_url || song?.img_url || '';
+}
+
 /**
  * Get all subscriptions for a user
  * @param {string} email - User email
@@ -31,8 +55,20 @@ export async function handleGetSubscriptions(email) {
 
       if (!song) {
         console.warn(`Song not found for subscription song_id: ${subscription.song_id}`);
+        subscriptionsWithSongs.push({
+          song_id: subscription.song_id,
+          title: subscription.title,
+          artist: subscription.artist,
+          album: subscription.album,
+          year: subscription.year,
+          image_url: subscription.image_url || subscription.img_url || '',
+          img_url: subscription.img_url || subscription.image_url || '',
+          subscribed_at: subscription.subscribed_at
+        });
         continue;
       }
+
+      const imageUrl = getImageUrl(song);
 
       subscriptionsWithSongs.push({
         song_id: subscription.song_id,
@@ -40,7 +76,8 @@ export async function handleGetSubscriptions(email) {
         artist: song.artist,
         album: song.album,
         year: song.year,
-        image_url: song.image_url,
+        image_url: imageUrl,
+        img_url: song.img_url || imageUrl,
         subscribed_at: subscription.subscribed_at
       });
     }
@@ -58,7 +95,7 @@ export async function handleGetSubscriptions(email) {
 
 /**
  * Add subscription for a user
- * @param {object} body - Request body with email and song_id
+ * @param {object} body - Request body with email and song_id or title/year
  * @returns {Promise<object>} Lambda response
  */
 export async function handleAddSubscription(body) {
@@ -67,14 +104,22 @@ export async function handleAddSubscription(body) {
       return errorResponse('Request body is required', 400);
     }
 
-    if (!body.email || !body.song_id) {
-      return errorResponse('Email and song_id are required', 400);
+    const songId = getSongIdentifier(body);
+
+    if (!body.email || !songId) {
+      return errorResponse('Email and song_id or song details are required', 400);
     }
 
     try {
       await putItem(subscriptionsTable, {
         email: body.email,
-        song_id: body.song_id,
+        song_id: songId,
+        ...(body.title && { title: body.title }),
+        ...(body.artist && { artist: body.artist }),
+        ...(body.album && { album: body.album }),
+        ...(body.year && { year: body.year }),
+        ...(body.image_url && { image_url: body.image_url }),
+        ...(body.img_url && { img_url: body.img_url }),
         subscribed_at: new Date().toISOString()
       }, {
         ConditionExpression: 'attribute_not_exists(email) AND attribute_not_exists(song_id)'
@@ -102,7 +147,7 @@ export async function handleAddSubscription(body) {
 
 /**
  * Remove subscription for a user
- * @param {object} body - Request body with email and song_id
+ * @param {object} body - Request body with email and song_id or title/year
  * @returns {Promise<object>} Lambda response
  */
 export async function handleRemoveSubscription(body) {
@@ -111,13 +156,35 @@ export async function handleRemoveSubscription(body) {
       return errorResponse('Request body is required', 400);
     }
 
-    if (!body.email || !body.song_id) {
-      return errorResponse('Email and song_id are required', 400);
+    const songId = getSongIdentifier(body);
+
+    if (!body.email) {
+      return errorResponse('Email and song_id or song details are required', 400);
+    }
+
+    let subscriptionSongId = songId;
+
+    if (!subscriptionSongId && body.title) {
+      const subscriptions = await queryItems(
+        subscriptionsTable,
+        'email = :email',
+        { ':email': body.email }
+      );
+      const matchingSubscription = subscriptions.find(subscription => (
+        subscription.title === body.title ||
+        String(subscription.song_id || '').startsWith(`${body.title}#`)
+      ));
+
+      subscriptionSongId = matchingSubscription?.song_id;
+    }
+
+    if (!subscriptionSongId) {
+      return errorResponse('Email and song_id or song details are required', 400);
     }
 
     await deleteItem(subscriptionsTable, {
       email: body.email,
-      song_id: body.song_id
+      song_id: subscriptionSongId
     });
 
     return successResponse({

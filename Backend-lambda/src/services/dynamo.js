@@ -158,19 +158,27 @@ export async function scanAllItems(
   }
 }
 
+function buildLegacySongId(song) {
+  if (!song?.title || !song?.year) {
+    return null;
+  }
+
+  return `${song.title}#${song.year}`;
+}
+
 /**
- * Find a song by song_id when the music table partition key is not available.
- * @param {string} songId - Song ID
+ * Find a song by Lambda song_id or upload_music.py title_year format.
+ * @param {string} songId - Song ID or title_year value
  * @returns {Promise<object|null>} Song data or null if not found
  */
 export async function getSongBySongId(songId) {
-  const songs = await scanAllItems(
-    musicTable,
-    'song_id = :song_id',
-    { ':song_id': songId }
-  );
+  const songs = await scanAllItems(musicTable);
 
-  return songs[0] || null;
+  return songs.find(song => (
+    song.song_id === songId ||
+    song.title_year === songId ||
+    buildLegacySongId(song) === songId
+  )) || null;
 }
 
 /**

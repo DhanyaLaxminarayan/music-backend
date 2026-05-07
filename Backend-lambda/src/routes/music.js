@@ -2,10 +2,31 @@
  * Music search routes
  */
 
-import { queryItems, scanAllItems } from '../services/dynamo.js';
+import { scanAllItems } from '../services/dynamo.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 const musicTable = process.env.MUSIC_TABLE || 'music';
+
+function buildLegacySongId(song) {
+  if (!song?.title || !song?.year) {
+    return null;
+  }
+
+  return `${song.title}#${song.year}`;
+}
+
+function normalizeSong(song) {
+  const songId = song.song_id || song.title_year || buildLegacySongId(song);
+  const imageUrl = song.image_url || song.img_url || '';
+
+  return {
+    ...song,
+    ...(songId && { song_id: songId }),
+    ...(song.title_year && { title_year: song.title_year }),
+    image_url: imageUrl,
+    img_url: song.img_url || imageUrl
+  };
+}
 
 /**
  * Handle music search with query parameters
@@ -33,44 +54,10 @@ export async function handleMusicSearch(queryParams) {
     }
 
     const titleFilter = title ? String(title).toLowerCase() : null;
-    const artistValue = artist ? String(artist).trim() : null;
-    const artistFilter = artistValue ? artistValue.toLowerCase() : null;
+    const artistFilter = artist ? String(artist).toLowerCase() : null;
     const albumFilter = album ? String(album).toLowerCase() : null;
 
-    let candidateSongs;
-
-    if (artistValue && album) {
-      candidateSongs = await queryItems(
-        musicTable,
-        'artist = :artist AND begins_with(album, :album)',
-        {
-          ':artist': artistValue,
-          ':album': String(album)
-        },
-        { IndexName: 'album-index' }
-      );
-    } else if (year && artistValue) {
-      candidateSongs = await queryItems(
-        musicTable,
-        '#year = :year AND artist = :artist',
-        {
-          ':year': parsedYear,
-          ':artist': artistValue
-        },
-        {
-          IndexName: 'year-artist-index',
-          ExpressionAttributeNames: { '#year': 'year' }
-        }
-      );
-    } else if (artistValue) {
-      candidateSongs = await queryItems(
-        musicTable,
-        'artist = :artist',
-        { ':artist': artistValue }
-      );
-    } else {
-      candidateSongs = await scanAllItems(musicTable);
-    }
+    const candidateSongs = await scanAllItems(musicTable);
 
     const songs = candidateSongs.filter(song => {
       const matchesTitle = !titleFilter || String(song.title || '').toLowerCase().includes(titleFilter);
@@ -79,7 +66,7 @@ export async function handleMusicSearch(queryParams) {
       const matchesYear = !year || Number(song.year) === parsedYear;
 
       return matchesTitle && matchesArtist && matchesAlbum && matchesYear;
-    });
+    }).map(normalizeSong);
 
     if (songs.length === 0) {
       return successResponse({

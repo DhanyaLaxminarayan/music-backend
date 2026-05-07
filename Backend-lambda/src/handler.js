@@ -72,18 +72,32 @@ export async function handler(event) {
         break;
 
       case 'music':
+      case 'getMusic':
         if (httpMethod === 'GET') {
           return await handleMusicSearch(queryStringParameters || {});
         }
         break;
 
       case 'subscriptions':
+      case 'getSub':
         if (httpMethod === 'GET') {
           const email = queryStringParameters?.email;
           return await handleGetSubscriptions(email);
-        } else if (httpMethod === 'POST') {
+        } else if (route.resource === 'subscriptions' && httpMethod === 'POST') {
           return await handleAddSubscription(requestBody);
-        } else if (httpMethod === 'DELETE') {
+        } else if (route.resource === 'subscriptions' && httpMethod === 'DELETE') {
+          return await handleRemoveSubscription(requestBody);
+        }
+        break;
+
+      case 'createSub':
+        if (httpMethod === 'POST') {
+          return await handleAddSubscription(requestBody);
+        }
+        break;
+
+      case 'deleteSub':
+        if (httpMethod === 'DELETE') {
           return await handleRemoveSubscription(requestBody);
         }
         break;

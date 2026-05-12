@@ -3,6 +3,7 @@
  */
 
 import { scanAllItems } from '../services/dynamo.js';
+import { withImageUrls } from '../services/images.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 const musicTable = process.env.MUSIC_TABLE || 'music';
@@ -15,17 +16,14 @@ function buildLegacySongId(song) {
   return `${song.title}#${song.year}`;
 }
 
-function normalizeSong(song) {
+async function normalizeSong(song) {
   const songId = song.song_id || song.title_year || buildLegacySongId(song);
-  const imageUrl = song.image_url || song.img_url || '';
 
-  return {
+  return withImageUrls({
     ...song,
     ...(songId && { song_id: songId }),
-    ...(song.title_year && { title_year: song.title_year }),
-    image_url: imageUrl,
-    img_url: song.img_url || imageUrl
-  };
+    ...(song.title_year && { title_year: song.title_year })
+  });
 }
 
 /**
@@ -59,14 +57,16 @@ export async function handleMusicSearch(queryParams) {
 
     const candidateSongs = await scanAllItems(musicTable);
 
-    const songs = candidateSongs.filter(song => {
+    const matchingSongs = candidateSongs.filter(song => {
       const matchesTitle = !titleFilter || String(song.title || '').toLowerCase().includes(titleFilter);
       const matchesArtist = !artistFilter || String(song.artist || '').toLowerCase().includes(artistFilter);
       const matchesAlbum = !albumFilter || String(song.album || '').toLowerCase().includes(albumFilter);
       const matchesYear = !year || Number(song.year) === parsedYear;
 
       return matchesTitle && matchesArtist && matchesAlbum && matchesYear;
-    }).map(normalizeSong);
+    });
+
+    const songs = await Promise.all(matchingSongs.map(normalizeSong));
 
     if (songs.length === 0) {
       return successResponse({

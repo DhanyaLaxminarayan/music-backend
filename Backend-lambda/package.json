@@ -20,7 +20,8 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.500.0",
     "@aws-sdk/client-s3": "^3.500.0",
-    "@aws-sdk/lib-dynamodb": "^3.500.0"
+    "@aws-sdk/lib-dynamodb": "^3.500.0",
+    "@aws-sdk/s3-request-presigner": "^3.1045.0"
   },
   "devDependencies": {
     "aws-sdk-client-mock": "^3.0.0"

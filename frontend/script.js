@@ -1,3 +1,4 @@
+// const BASE_URL = "https://n1ykm7enxa.execute-api.us-east-1.amazonaws.com/dev";
 const BASE_URL = "http://34.207.240.204";
 
 async function loginUser() {
@@ -75,7 +76,7 @@ async function searchMusic() {
     if (year) query.push(`year=${year}`);
 
     const response = await fetch(
-        `${BASE_URL}/getMusic?${query.join("&")}`
+        `${BASE_URL}/music?${query.join("&")}`
     );
 
     const data = await response.json();
@@ -128,7 +129,7 @@ async function subscribeMusic(title, artist, album, year) {
 
     const email = localStorage.getItem("email");
 
-    await fetch(`${BASE_URL}/createSub`, {
+    await fetch(`${BASE_URL}/subscriptions`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -150,7 +151,7 @@ async function loadSubscriptions() {
     const email = localStorage.getItem("email");
 
     const response = await fetch(
-        `${BASE_URL}/getSub?email=${email}`
+        `${BASE_URL}/subscriptions?email=${email}`
     );
 
     const data = await response.json();
@@ -187,7 +188,7 @@ async function deleteSubscription(title) {
 
     const email = localStorage.getItem("email");
 
-    await fetch(`${BASE_URL}/deleteSub`, {
+    await fetch(`${BASE_URL}/subscriptions`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"

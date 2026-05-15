@@ -47,10 +47,12 @@ for song in songs:
         Item={
             "title": title,
             "title_year": f"{title}#{year}",
+            "song_id": f"{title}#{year}",
             "artist": artist,
             "year": year,
             "album": album,
-            "img_url": s3_url
+            "img_url": s3_url,
+            "image_url": s3_url
         }
     )
 

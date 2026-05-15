@@ -1,0 +1,589 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-dark: #050816;
+    --bg-purple: #27104e;
+    --bg-pink: #a21caf;
+    --neon-pink: #ff3cac;
+    --neon-blue: #2b86ff;
+    --neon-purple: #8b5cf6;
+    --white: #ffffff;
+    --soft-white: rgba(255, 255, 255, 0.88);
+    --glass: rgba(255, 255, 255, 0.13);
+    --glass-strong: rgba(255, 255, 255, 0.92);
+    --border-glass: rgba(255, 255, 255, 0.28);
+    --text-dark: #111827;
+    --text-muted: #6b7280;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --shadow-heavy: 0 30px 70px rgba(0, 0, 0, 0.35);
+    --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.18);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    color: var(--white);
+    background:
+        radial-gradient(circle at 12% 20%, rgba(255, 60, 172, 0.45), transparent 30%),
+        radial-gradient(circle at 88% 15%, rgba(43, 134, 255, 0.45), transparent 28%),
+        radial-gradient(circle at 50% 85%, rgba(139, 92, 246, 0.38), transparent 35%),
+        linear-gradient(135deg, #050816 0%, #1e1b4b 45%, #581c87 100%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.25) 100%);
+}
+
+/* =========================
+   LOGIN + REGISTER PAGES
+   ========================= */
+
+.login-container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 110px 20px 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.login-container::before {
+    content: "♪";
+    position: absolute;
+    top: 12%;
+    left: 10%;
+    font-size: 115px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.07);
+    transform: rotate(-18deg);
+    text-shadow: 0 0 35px rgba(255, 60, 172, 0.45);
+}
+
+.login-container::after {
+    content: "♫";
+    position: absolute;
+    right: 11%;
+    bottom: 12%;
+    font-size: 135px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.07);
+    transform: rotate(15deg);
+    text-shadow: 0 0 35px rgba(43, 134, 255, 0.45);
+}
+
+.login-container h1 {
+    position: absolute;
+    top: 38px;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    text-align: center;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: white;
+    text-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+.login-container h1::after {
+    content: "Stream. Search. Subscribe.";
+    display: block;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.form-box {
+    position: relative;
+    z-index: 2;
+    width: 410px;
+    padding: 42px;
+    border-radius: 30px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82));
+    color: var(--text-dark);
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(22px);
+    overflow: hidden;
+}
+
+.form-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue), var(--neon-purple));
+}
+
+.form-box::after {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    right: -70px;
+    bottom: -70px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 60, 172, 0.22), transparent 70%);
+    pointer-events: none;
+}
+
+.form-box h2 {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 28px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: 900;
+    color: #0f172a;
+}
+
+.form-box h2::after {
+    content: "";
+    display: block;
+    width: 58px;
+    height: 4px;
+    margin: 12px auto 0;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
+}
+
+input {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 15px 16px;
+    margin-top: 16px;
+    border-radius: 16px;
+    border: 1px solid #d1d5db;
+    background: rgba(249, 250, 251, 0.96);
+    color: #111827;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.23s ease;
+}
+
+input::placeholder {
+    color: #9ca3af;
+}
+
+input:focus {
+    border-color: var(--neon-purple);
+    background: white;
+    box-shadow:
+        0 0 0 4px rgba(139, 92, 246, 0.18),
+        0 10px 24px rgba(139, 92, 246, 0.12);
+    transform: translateY(-1px);
+}
+
+button {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 15px 18px;
+    margin-top: 22px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-blue));
+    background-size: 220% 220%;
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 14px 28px rgba(139, 92, 246, 0.28);
+}
+
+button:hover {
+    transform: translateY(-3px);
+    background-position: right center;
+    box-shadow: 0 18px 35px rgba(255, 60, 172, 0.32);
+}
+
+button:active {
+    transform: translateY(-1px);
+}
+
+#message,
+#registerMessage {
+    position: relative;
+    z-index: 1;
+    margin-top: 14px;
+    text-align: center;
+    color: #dc2626;
+    font-weight: 800;
+}
+
+.register-text {
+    position: relative;
+    z-index: 1;
+    margin-top: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14.5px;
+}
+
+.register-text a {
+    color: var(--neon-purple);
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.register-text a:hover {
+    color: var(--neon-pink);
+    text-decoration: underline;
+}
+
+/* =========================
+   MAIN PAGE
+   ========================= */
+
+.main-container {
+    width: 92%;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 34px 0 60px;
+    position: relative;
+    z-index: 2;
+}
+
+.top-bar {
+    min-height: 96px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 30px;
+    margin-bottom: 28px;
+    border-radius: 30px;
+    background:
+        linear-gradient(135deg, rgba(255, 60, 172, 0.92), rgba(139, 92, 246, 0.88), rgba(43, 134, 255, 0.84));
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+}
+
+.top-bar::before {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    right: -90px;
+    top: -110px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.13);
+}
+
+.top-bar::after {
+    content: "LIVE MUSIC LIBRARY";
+    position: absolute;
+    right: 32px;
+    bottom: 12px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.top-bar h2 {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 29px;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+
+.top-bar span {
+    color: #fff7ed;
+}
+
+.top-bar button {
+    position: relative;
+    z-index: 1;
+    width: auto;
+    margin: 0;
+    padding: 12px 24px;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
+}
+
+.top-bar button:hover {
+    background: #020617;
+    box-shadow: 0 15px 32px rgba(0, 0, 0, 0.32);
+}
+
+.query-section,
+.results-section,
+.subscription-section {
+    position: relative;
+    margin-top: 24px;
+    padding: 26px;
+    border-radius: 30px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(255,255,255,0.86));
+    color: var(--text-dark);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(255, 255, 255, 0.68);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+}
+
+.query-section::before,
+.results-section::before,
+.subscription-section::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue), var(--neon-purple));
+}
+
+.query-section h3,
+.results-section h3,
+.subscription-section h3 {
+    grid-column: 1 / -1;
+    margin: 0 0 20px;
+    font-size: 24px;
+    font-weight: 900;
+    color: #111827;
+}
+
+.query-section h3::before {
+    content: "🔎 ";
+}
+
+.results-section h3::before {
+    content: "🎧 ";
+}
+
+.subscription-section h3::before {
+    content: "💿 ";
+}
+
+.query-section {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    align-items: end;
+}
+
+.query-section input {
+    margin-top: 0;
+    background: white;
+}
+
+.query-section button {
+    height: 49px;
+    margin-top: 0;
+}
+
+#results,
+#subscriptions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+    gap: 20px;
+}
+
+.music-card {
+    position: relative;
+    margin-top: 0;
+    padding: 20px;
+    border-radius: 26px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.96));
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.11);
+    overflow: hidden;
+    transition: all 0.25s ease;
+}
+
+.music-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple), var(--neon-blue));
+}
+
+.music-card::after {
+    content: "♪";
+    position: absolute;
+    right: 16px;
+    top: 18px;
+    font-size: 42px;
+    color: rgba(139, 92, 246, 0.10);
+    font-weight: 900;
+}
+
+.music-card:hover {
+    transform: translateY(-7px) scale(1.01);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.20);
+}
+
+.music-card h4 {
+    position: relative;
+    z-index: 1;
+    margin: 10px 0 14px;
+    padding-right: 36px;
+    color: #0f172a;
+    font-size: 21px;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.music-card p {
+    position: relative;
+    z-index: 1;
+    margin: 7px 0;
+    color: #4b5563;
+    font-size: 14.5px;
+    line-height: 1.4;
+}
+
+.music-card p:first-of-type {
+    color: #111827;
+    font-weight: 700;
+}
+
+.music-card img {
+    position: relative;
+    z-index: 1;
+    width: 145px;
+    height: 145px;
+    object-fit: cover;
+    display: block;
+    margin-top: 15px;
+    border-radius: 24px;
+    background: #e5e7eb;
+    border: 1px solid rgba(209, 213, 219, 0.85);
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+    transition: all 0.25s ease;
+}
+
+.music-card:hover img {
+    transform: rotate(-1deg) scale(1.03);
+}
+
+.music-card button {
+    margin-top: 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #111827, #312e81);
+    box-shadow: 0 14px 28px rgba(17, 24, 39, 0.24);
+}
+
+.music-card button:hover {
+    background: linear-gradient(135deg, #020617, #581c87);
+}
+
+.subscription-section .music-card button {
+    background: linear-gradient(135deg, #ef4444, #be123c);
+}
+
+.subscription-section .music-card button:hover {
+    background: linear-gradient(135deg, #dc2626, #881337);
+}
+
+#results > p,
+#subscriptions > p {
+    margin: 0;
+    padding: 18px;
+    border-radius: 18px;
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    border: 1px dashed #cbd5e1;
+}
+
+/* =========================
+   MOBILE RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+    .login-container {
+        padding-top: 115px;
+    }
+
+    .login-container h1 {
+        font-size: 30px;
+        padding: 0 18px;
+    }
+
+    .login-container h1::after {
+        font-size: 11px;
+        letter-spacing: 2px;
+    }
+
+    .form-box {
+        width: 100%;
+        max-width: 410px;
+        padding: 32px 26px;
+    }
+
+    .main-container {
+        width: 94%;
+    }
+
+    .top-bar {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .top-bar::after {
+        display: none;
+    }
+
+    .top-bar button {
+        width: 100%;
+    }
+
+    .query-section {
+        grid-template-columns: 1fr;
+    }
+
+    #results,
+    #subscriptions {
+        grid-template-columns: 1fr;
+    }
+
+    .music-card img {
+        width: 132px;
+        height: 132px;
+    }
+}

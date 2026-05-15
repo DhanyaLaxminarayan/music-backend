@@ -189,9 +189,7 @@ async function loadSubscriptions() {
 
             ${imageUrl ? `<img src="${imageUrl}" alt="${song.artist || "Artist"}">` : `<p>No image available</p>`}
 
-            <button onclick='deleteSubscription(
-                "${song.title}"
-            )'>
+            <button onclick='deleteSubscription("${encodeURIComponent(JSON.stringify(song))}")'>
                 Remove
             </button>
 
@@ -200,9 +198,10 @@ async function loadSubscriptions() {
     });
 }
 
-async function deleteSubscription(title) {
+async function deleteSubscription(encodedSong) {
 
     const email = localStorage.getItem("email");
+    const song = JSON.parse(decodeURIComponent(encodedSong));
 
     await fetch(`${BASE_URL}/deleteSub`, {
         method: "DELETE",
@@ -211,7 +210,11 @@ async function deleteSubscription(title) {
         },
         body: JSON.stringify({
             email,
-            title
+            song_id: song.song_id,
+            title: song.title,
+            artist: song.artist,
+            album: song.album,
+            year: song.year
         })
     });
 

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="main-container">
+
+        <div class="top-bar">
+            <h2>Welcome <span id="username"></span></h2>
+
+            <button onclick="logoutUser()">Logout</button>
+        </div>
+
+        <div class="query-section">
+
+            <h3>Search Music</h3>
+
+            <input type="text" id="title" placeholder="Title">
+
+            <input type="text" id="artist" placeholder="Artist">
+
+            <input type="text" id="album" placeholder="Album">
+
+            <input type="text" id="year" placeholder="Year">
+
+            <button onclick="searchMusic()">Query</button>
+
+        </div>
+
+        <div class="results-section">
+
+            <h3>Music Results</h3>
+
+            <div id="results"></div>
+
+        </div>
+
+        <div class="subscription-section">
+
+            <h3>My Subscriptions</h3>
+
+            <div id="subscriptions"></div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -70,10 +70,10 @@ async function searchMusic() {
 
     let query = [];
 
-    if (title) query.push(`title=${title}`);
-    if (artist) query.push(`artist=${artist}`);
-    if (album) query.push(`album=${album}`);
-    if (year) query.push(`year=${year}`);
+    if (title) query.push(`title=${encodeURIComponent(title)}`);
+    if (artist) query.push(`artist=${encodeURIComponent(artist)}`);
+    if (album) query.push(`album=${encodeURIComponent(album)}`);
+    if (year) query.push(`year=${encodeURIComponent(year)}`);
 
     const response = await fetch(
         `${BASE_URL}/music?${query.join("&")}`

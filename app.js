@@ -26,7 +26,14 @@ const dynamoClient = new DynamoDBClient({ region: AWS_REGION });
 const dynamodb = DynamoDBDocumentClient.from(dynamoClient);
 const s3 = new S3Client({ region: AWS_REGION });
 
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 
 function norm(value) {

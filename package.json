@@ -6,7 +6,11 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "cors": "^2.8.6",
+    "@aws-sdk/client-dynamodb": "^3.808.0",
+    "@aws-sdk/client-s3": "^3.808.0",
+    "@aws-sdk/lib-dynamodb": "^3.808.0",
+    "@aws-sdk/s3-request-presigner": "^3.808.0",
+    "cors": "^2.8.5",
     "express": "^4.18.2"
   }
 }

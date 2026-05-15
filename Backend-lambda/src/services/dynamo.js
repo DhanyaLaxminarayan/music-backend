@@ -13,8 +13,9 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 
 const region = process.env.AWS_REGION || 'us-east-1';
+// Lambda uses its execution role credentials to access DynamoDB.
 const dynamoClient = new DynamoDBClient({ region });
-const musicTable = process.env.MUSIC_TABLE || 'music';
+const musicTable = process.env.MUSIC_TABLE || 'music-final';
 
 /**
  * Get item from DynamoDB table
@@ -82,6 +83,45 @@ export async function queryItems(
     return response.Items || [];
   } catch (error) {
     console.error(`Error querying ${tableName}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Query all matching pages from a DynamoDB table.
+ * @param {string} tableName - Table name
+ * @param {string} keyConditionExpression - Key condition expression
+ * @param {object} expressionAttributeValues - Attribute values for expression
+ * @param {object} options - Additional query options
+ * @returns {Promise<array>} Array of items from all pages
+ */
+export async function queryAllItems(
+  tableName,
+  keyConditionExpression,
+  expressionAttributeValues = {},
+  options = {}
+) {
+  try {
+    const items = [];
+    let exclusiveStartKey;
+
+    do {
+      const command = new QueryCommand({
+        TableName: tableName,
+        KeyConditionExpression: keyConditionExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ...options,
+        ExclusiveStartKey: exclusiveStartKey
+      });
+      const response = await dynamoClient.send(command);
+
+      items.push(...(response.Items || []));
+      exclusiveStartKey = response.LastEvaluatedKey;
+    } while (exclusiveStartKey);
+
+    return items;
+  } catch (error) {
+    console.error(`Error querying all items from ${tableName}:`, error);
     throw error;
   }
 }

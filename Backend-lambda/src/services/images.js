@@ -2,7 +2,7 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const region = process.env.AWS_REGION || 'us-east-1';
-const s3Bucket = process.env.S3_BUCKET || '';
+const s3Bucket = process.env.S3_BUCKET || 'music-a2-images-307302876893-final';
 const s3Client = new S3Client({ region });
 
 function parseS3Url(value) {
@@ -43,6 +43,7 @@ async function buildPresignedImageUrl(song) {
   const bucket = imageKey ? s3Bucket : parsedUrl?.bucket;
   const key = imageKey || parsedUrl?.key;
 
+  // Return a presigned S3 URL when the image is stored as an object key.
   if (!bucket || !key) {
     return song?.image_url || song?.img_url || '';
   }

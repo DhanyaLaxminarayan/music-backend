@@ -18,6 +18,10 @@ function sha1(value) {
 }
 
 function makeSubscriptionSongId(song) {
+  if (song?.title_year) {
+    return String(song.title_year);
+  }
+
   const raw = [
     norm(song.artist),
     norm(song.title),
@@ -157,12 +161,14 @@ export async function handleAddSubscription(body) {
 
     try {
       await putItem(subscriptionsTable, {
+        // subscriptions table key: email + song_id
         email: body.email,
         song_id: songId,
         title: song.title,
         artist: song.artist,
         year: song.year == null ? '' : String(song.year).trim(),
         album: song.album || '',
+        ...(song.title_year && { title_year: song.title_year }),
         artist_norm: norm(song.artist),
         title_norm: norm(song.title),
         album_norm: norm(song.album),

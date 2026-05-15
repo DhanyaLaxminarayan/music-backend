@@ -18,7 +18,7 @@ const LOGIN_TABLE = process.env.LOGIN_TABLE || "login";
 const MUSIC_TABLE = process.env.MUSIC_TABLE || "music-final";
 const SUBSCRIPTIONS_TABLE = process.env.SUBSCRIPTIONS_TABLE || "subscriptions";
 const S3_BUCKET = process.env.S3_BUCKET || "music-a2-images-307302876893-final";
-const PORT = Number(process.env.PORT || 5000);
+const PORT = Number(process.env.PORT || 80);
 
 const app = express();
 // ECS uses the task role credentials to access DynamoDB and S3.

@@ -2,9 +2,9 @@ const express = require("express");
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("ECS Backend is running 🚀");
+  res.send("ECS Backend is running ");
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+app.listen(80, () => {
+  console.log("Server running on port 80");
 });
